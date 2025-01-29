@@ -32,9 +32,15 @@ class Amenity(AmenityBase):
 class FlatBase(BaseModel):
     title: str
     description: str
-    price_per_month: float
-    coordinates: str
+    address: str
+    latitude: float
+    longitude: float
     city_id: int
+    floor: int
+    rooms_number: int
+    square: float
+    price: float
+    currency: str
     amenities_ids: List[int]  # List of amenity ids
 
 class FlatCreate(FlatBase):

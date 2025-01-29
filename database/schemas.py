@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
-from database import Base
+
+from database.database import Base
 
 
 class CitySchema(Base):
@@ -23,22 +24,39 @@ class AmenitySchema(Base):
     def __repr__(self):
         return f"<Amenity {self.name} - id {self.id}>"
 
+
 class FlatSchema(Base):
     __tablename__ = "flats"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     description = Column(String)
-    price = Column(Float)
-    currency = Column(String)
-    coordinates = Column(String)  # Store coordinates as a string (e.g., "latitude,longitude")
+    address = Column(String)
+    # coordinates = Column(Geography(geometry_type="POINT", srid=4326))
+    # Storing as Geography POINT (latitude, longitude) POSTGRE ONLY
+    latitude = Column(Float)  # Latitude of the apartment
+    longitude = Column(Float)  # Longitude of the apartment
+    floor = Column(Integer)
+    rooms_number = Column(Integer)
+    square = Column(Float)
+    price = Column(Float)  # per month
+    currency = Column(String, default="PLN")
     city_id = Column(Integer, ForeignKey("cities.id"))
 
     city = relationship("City", back_populates="flats")
     amenities = relationship("Amenity", secondary="flat_amenities", back_populates="flats")
 
     def __repr__(self):
-        return f"<Flat {self.title} - id {self.id}>"
+        return (f"<Flat - id {self.id}>"
+                f"\nTitle: {self.title}"
+                f"\nDescription: {self.description}"
+                f"\nPrice: {self.price} {self.currency}"
+                f"\nAddress: {self.address}"
+                f"\nCoordinates: {self.coordinates}"
+                f"\nFloor: {self.floor}"
+                f"\nRooms number: {self.rooms_number}"
+                f"\nSquare: {self.square}"
+                f"\nCity: {self.city.name} - id {self.city.id}")
 
 
 class FlatAmenitySchema(Base):
