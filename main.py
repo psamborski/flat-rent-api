@@ -12,13 +12,18 @@ from database.schemas import CitySchema, AmenitySchema, FlatSchema, FlatAmenityS
 app = FastAPI()
 
 
+# Dependency to get database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 @app.get("/")
 async def root():
     return {"message": "Dummy flat rent API."}
-
-
-    finally:
-        db.close()
 
 
 # Create a new city
