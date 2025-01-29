@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from database import Base
 
 
-class City(Base):
+class CitySchema(Base):
     __tablename__ = "cities"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -14,7 +14,7 @@ class City(Base):
         return f"<City {self.name} - id {self.id}>"
 
 
-class Amenity(Base):
+class AmenitySchema(Base):
     __tablename__ = "amenities"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -23,7 +23,7 @@ class Amenity(Base):
     def __repr__(self):
         return f"<Amenity {self.name} - id {self.id}>"
 
-class Flat(Base):
+class FlatSchema(Base):
     __tablename__ = "flats"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -41,7 +41,7 @@ class Flat(Base):
         return f"<Flat {self.title} - id {self.id}>"
 
 
-class FlatAmenity(Base):
+class FlatAmenitySchema(Base):
     __tablename__ = "flat_amenities"
 
     flat_id = Column(Integer, ForeignKey("flats.id", ondelete="CASCADE"), primary_key=True)
@@ -52,7 +52,7 @@ class FlatAmenity(Base):
 
 
 # Establish a relationship back to the flats in Amenity class
-Amenity.flats = relationship("Flat", secondary="flat_amenities", back_populates="amenities")
+AmenitySchema.flats = relationship("Flat", secondary="flat_amenities", back_populates="amenities")
 
 # Establish a relationship back to the flats in City class
-City.flats = relationship("Flat", back_populates="city")
+CitySchema.flats = relationship("Flat", back_populates="city")
