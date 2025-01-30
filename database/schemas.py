@@ -43,8 +43,8 @@ class FlatSchema(Base):
     currency = Column(String, default="PLN")
     city_id = Column(Integer, ForeignKey("cities.id"))
 
-    city = relationship("City", back_populates="flats")
-    amenities = relationship("Amenity", secondary="flat_amenities", back_populates="flats")
+    city = relationship("CitySchema", back_populates="flats")
+    amenities = relationship("AmenitySchema", secondary="flat_amenities", back_populates="flats")
 
     def __repr__(self):
         return (f"<Flat - id {self.id}>"
@@ -70,7 +70,7 @@ class FlatAmenitySchema(Base):
 
 
 # Establish a relationship back to the flats in Amenity class
-AmenitySchema.flats = relationship("Flat", secondary="flat_amenities", back_populates="amenities")
+AmenitySchema.flats = relationship("FlatSchema", secondary="flat_amenities", back_populates="amenities")
 
 # Establish a relationship back to the flats in City class
-CitySchema.flats = relationship("Flat", back_populates="city")
+CitySchema.flats = relationship("FlatSchema", back_populates="city")
