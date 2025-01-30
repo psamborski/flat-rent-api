@@ -21,9 +21,26 @@ def get_db():
         db.close()
 
 
+### GET methods
+
 @app.get("/")
 async def root():
     return {"message": "Dummy flat rent API."}
+
+
+# Get all flats
+@app.get("/flats/", response_model=List[Flat])
+def get_flats(db: Session = Depends(get_db)):
+    return db.query(FlatSchema).all()
+
+
+# Get a flat by id
+@app.get("/flats/{flat_id}", response_model=Flat)
+def get_flat(flat_id: int, db: Session = Depends(get_db)):
+    db_flat = db.query(FlatSchema).filter(FlatSchema.id == flat_id).first()
+    if db_flat is None:
+        raise HTTPException(status_code=404, detail="Flat not found")
+    return db_flat
 
 
 # Create a new city
@@ -45,6 +62,8 @@ def create_amenity(amenity: AmenityCreate, db: Session = Depends(get_db)):
     db.refresh(db_amenity)
     return db_amenity
 
+
+### POST methods
 
 # Create a new flat
 @app.post("/flats/", response_model=Flat)
@@ -74,19 +93,4 @@ def create_flat(flat: FlatCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_flat)
 
-    return db_flat
-
-
-# Get all flats
-@app.get("/flats/", response_model=List[Flat])
-def get_flats(db: Session = Depends(get_db)):
-    return db.query(FlatSchema).all()
-
-
-# Get a flat by id
-@app.get("/flats/{flat_id}", response_model=Flat)
-def get_flat(flat_id: int, db: Session = Depends(get_db)):
-    db_flat = db.query(FlatSchema).filter(FlatSchema.id == flat_id).first()
-    if db_flat is None:
-        raise HTTPException(status_code=404, detail="Flat not found")
     return db_flat
