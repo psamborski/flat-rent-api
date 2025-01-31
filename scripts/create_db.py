@@ -3,8 +3,10 @@ import traceback
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+
 from database.database import engine, Base
-from database.schemas import CitySchema, AmenitySchema, FlatSchema, FlatAmenitySchema
+from scripts.add_data_to_db import add_cities, add_amenities, add_flats, add_flat_amenities
+
 
 # Create schema if it doesn't exist
 def create_schema():
@@ -14,33 +16,34 @@ def create_schema():
         connection.execute(text("CREATE SCHEMA IF NOT EXISTS flat_rent_api;"))
         connection.commit()
 
+
 # Create tables in DB
 def create_tables():
     print("Creating DB tables...")
 
     Base.metadata.create_all(bind=engine)
 
+
 # Load data from JSON file
-def load_data_from_json(filename='static_data/flat_rent_api-addresses.json'):
+def insert_data_from_json_to_db(filename='static_data/flat_rent_api-addresses.json'):
     print(f"Loading data from {filename}...")
 
     with open(filename, "r") as file:
         data = json.load(file)
 
     with Session(engine) as session:
-        for city_data in data["cities"]:
-            city = CitySchema(**city_data)
-            session.add(city)
+        # Add cities
+        add_cities(session, data["cities"])
 
-        for amenity_data in data["amenities"]:
-            amenity = AmenitySchema(**amenity_data)
-            session.add(amenity)
+        # Add amenities
+        add_amenities(session, data["amenities"])
 
-        for flat_data in data["flats"]:
-            flat = FlatSchema(**flat_data)
-            session.add(flat)
+        # Add flats
+        flats = add_flats(session, data["flats"])
 
-        session.commit()
+        # Add associations between flats and amenities
+        add_flat_amenities(session, data["flats"], flats)
+
 
 if __name__ == "__main__":
     try:
@@ -58,8 +61,10 @@ if __name__ == "__main__":
 
     try:
         # Load data from given JSON file
-        # load_data_from_json()
-        ...
+        insert_data_from_json_to_db()
+        print(
+            "Data loaded successfully!\n"
+            "You can now run the app and use the API.")
     except Exception as e:
         print(f"Data loading failed.\n\nTraceback:")
         print(traceback.format_exc())
