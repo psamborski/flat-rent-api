@@ -1,3 +1,4 @@
+from geoalchemy2 import Geography
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -29,19 +30,17 @@ class FlatSchema(Base):
     __tablename__ = "flats"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
+    title = Column(String, index=True, nullable=False)
     description = Column(String)
     address = Column(String)
-    # coordinates = Column(Geography(geometry_type="POINT", srid=4326))
-    # Storing as Geography POINT (latitude, longitude) POSTGRE ONLY
-    latitude = Column(Float)  # Latitude of the apartment
-    longitude = Column(Float)  # Longitude of the apartment
+    # quarter = Column(String)
+    coordinates = Column(Geography(geometry_type="POINT", srid=4326), nullable=False)
     floor = Column(Integer)
     rooms_number = Column(Integer)
     square = Column(Float)
-    price = Column(Float)  # per month
-    currency = Column(String, default="PLN")
-    city_id = Column(Integer, ForeignKey("cities.id"))
+    price = Column(Float, nullable=False)  # per month
+    currency = Column(String, default="PLN", nullable=False)
+    city_id = Column(Integer, ForeignKey("cities.id"), nullable=False)
 
     city = relationship("CitySchema", back_populates="flats")
     amenities = relationship("AmenitySchema", secondary="flat_amenities", back_populates="flats")
