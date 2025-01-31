@@ -19,6 +19,8 @@ services:
 
   app:
     build: .
+    ports:
+      - "8000:8000"
     environment:
       PYTHONUNBUFFERED: 1
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
