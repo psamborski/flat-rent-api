@@ -1,0 +1,71 @@
+# Test your FastAPI endpoints
+
+GET http://127.0.0.1:8000/
+Accept: application/json
+
+###
+
+### Test: Get all apartments
+GET http://127.0.0.1:8000/flats HTTP/1.1
+Accept: application/json
+
+###
+
+### Test: Get a single apartment by ID
+GET http://127.0.0.1:8000/flats/1 HTTP/1.1
+Accept: application/json
+
+###
+
+### Test: Get all cities
+GET http://127.0.0.1:8000/cities HTTP/1.1
+Accept: application/json
+
+###
+
+### Test: Get all amenities
+GET http://127.0.0.1:8000/amenities HTTP/1.1
+Accept: application/json
+
+### Test: Create a new apartment
+POST http://127.0.0.1:8000/flats/
+Content-Type: application/json
+
+{
+    "title": "Spacious apartment in Warsaw",
+    "description": "A cozy and spacious apartment in the heart of Warsaw, perfect for young professionals.",
+    "address": "123 Main Street, Warsaw, Poland",
+    "latitude": 52.2297,
+    "longitude": 21.0122,
+    "floor": 3,
+    "rooms_number": 2,
+    "square": 50.0,
+    "price": 2500,
+    "currency": "PLN",
+    "city_id": 1,
+    "amenities": [1, 3, 5]
+}
+
+###
+
+### Test: Update an existing apartment
+#PUT http://127.0.0.1:8000/flats/1 HTTP/1.1
+#Content-Type: application/json
+#Accept: application/json
+
+#{
+#  "title": "Updated Apartment Title",
+#  "description": "An updated description for this apartment.",
+#  "price": 1600,
+#  "coordinates": {"lat": 52.2298, "long": 21.0118},
+#  "city_id": 1,
+#  "amenities": [1, 3]
+#}
+
+###
+
+### Test: Delete an apartment
+#DELETE http://127.0.0.1:8000/flats/1 HTTP/1.1
+#Accept: application/json
+
+###
