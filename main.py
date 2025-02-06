@@ -6,7 +6,6 @@ from database.database import SessionLocal
 
 # Import schemas and models
 from models.models import City, Amenity, Flat, CityCreate, AmenityCreate, FlatCreate
-from database.schemas import CitySchema, AmenitySchema, FlatSchema, FlatAmenitySchema
 
 # FastAPI app initialization
 app = FastAPI()

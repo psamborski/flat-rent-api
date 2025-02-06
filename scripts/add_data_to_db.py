@@ -1,4 +1,7 @@
-from database.schemas import CitySchema, AmenitySchema, FlatSchema, FlatAmenitySchema
+from database.AmenitySchema import AmenitySchema
+from database.CitySchema import CitySchema
+from database.FlatAmenitySchema import FlatAmenitySchema
+from database.FlatSchema import FlatSchema
 from scripts.utils import reformat_flat_data
 
 def add_cities(session, cities_data):
