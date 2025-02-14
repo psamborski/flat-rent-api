@@ -2,10 +2,9 @@ from typing import List, Optional, Dict, Any
 
 from geoalchemy2.shape import from_shape
 from pydantic import BaseModel, Field
+from shapely.geometry import shape
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from shapely.geometry import shape
-
 
 from database.schemas.DistrictSchema import DistrictSchema
 
@@ -16,11 +15,13 @@ class DistrictCreate(BaseModel):
     """
     name: str = Field(..., min_length=1, max_length=200)  # District name, required, 1-200 characters
     boundaries: Dict[str, Any] = Field(..., description="Geographic boundaries in GeoJSON format")  # GeoJSON format
-    city_id: int = Field(..., gt=0, description="ID of the city associated with the district")  # City ID, must be greater than 0
+    city_id: int = Field(..., gt=0,
+                         description="ID of the city associated with the district")  # City ID, must be greater than 0
 
 
 def get_table_schema():
     return {column.name: column for column in DistrictSchema.__table__.columns}
+
 
 def get_table_cols_with_geojson():
     cols = get_table_schema()
@@ -83,7 +84,8 @@ class DistrictResource:
         self.db.refresh(district)
         return district
 
-    def update_district(self, district_id: int, name: Optional[str] = None, boundaries: Optional[Dict[str, Any]] = None) -> Optional[DistrictSchema]:
+    def update_district(self, district_id: int, name: Optional[str] = None,
+                        boundaries: Optional[Dict[str, Any]] = None) -> Optional[DistrictSchema]:
         """
         Update an existing district in the database.
 

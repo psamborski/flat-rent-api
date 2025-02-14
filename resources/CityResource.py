@@ -1,26 +1,17 @@
 from typing import List, Optional, Dict, Any
 
 from geoalchemy2.shape import from_shape
-from pydantic import BaseModel, Field
+from shapely.geometry import shape
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from shapely.geometry import shape
 
-
+from api.schemas.CityApiSchema import CityCreate
 from database.schemas.CitySchema import CitySchema
-
-
-class CityCreate(BaseModel):
-    """
-    Pydantic model for validating city creation data.
-    """
-    name: str = Field(..., min_length=1, max_length=200)  # City name, required, 1-200 characters
-    boundaries: Dict[str, Any] = Field(..., description="Geographic boundaries in GeoJSON format")  # GeoJSON format
-    country: str = Field(..., max_length=200)  # Country name, required, 1-200 characters
 
 
 def get_table_schema():
     return {column.name: column for column in CitySchema.__table__.columns}
+
 
 def get_table_cols_with_geojson():
     cols = get_table_schema()
@@ -83,7 +74,8 @@ class CityResource:
         self.db.refresh(city)
         return city
 
-    def update_city(self, city_id: int, name: Optional[str] = None, boundaries: Optional[Dict[str, Any]] = None, country: Optional[str] = None) -> Optional[CitySchema]:
+    def update_city(self, city_id: int, name: Optional[str] = None, boundaries: Optional[Dict[str, Any]] = None,
+                    country: Optional[str] = None) -> Optional[CitySchema]:
         """
         Update an existing city in the database.
 

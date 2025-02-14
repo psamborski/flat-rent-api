@@ -2,10 +2,16 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
+from api.schemas.AmenityApiSchema import AmenityResponse, AmenityCreate
+from api.schemas.CityApiSchema import CityResponse, CityCreate
+from api.schemas.FlatApiSchema import FlatResponse, FlatCreate
 from database.database import SessionLocal
+from database.schemas.AmenitySchema import AmenitySchema
+from database.schemas.CitySchema import CitySchema
+from database.schemas.FlatAmenitySchema import FlatAmenitySchema
+from database.schemas.FlatSchema import FlatSchema
 
 # Import schemas and models
-from models.models import City, Amenity, Flat, CityCreate, AmenityCreate, FlatCreate
 
 # FastAPI app initialization
 app = FastAPI()
@@ -28,13 +34,13 @@ async def root():
 
 
 # Get all flats
-@app.get("/flats/", response_model=List[Flat])
+@app.get("/flats/", response_model=List[FlatResponse])
 def get_flats(db: Session = Depends(get_db)):
     return db.query(FlatSchema).all()
 
 
 # Get a flat by id
-@app.get("/flats/{flat_id}", response_model=Flat)
+@app.get("/flats/{flat_id}", response_model=FlatResponse)
 def get_flat(flat_id: int, db: Session = Depends(get_db)):
     db_flat = db.query(FlatSchema).filter(FlatSchema.id == flat_id).first()
     if db_flat is None:
@@ -43,7 +49,7 @@ def get_flat(flat_id: int, db: Session = Depends(get_db)):
 
 
 # Create a new city
-@app.post("/cities/", response_model=City)
+@app.post("/cities/", response_model=CityResponse)
 def create_city(city: CityCreate, db: Session = Depends(get_db)):
     db_city = CitySchema(name=city.name, country=city.country)
     db.add(db_city)
@@ -53,7 +59,7 @@ def create_city(city: CityCreate, db: Session = Depends(get_db)):
 
 
 # Create a new amenity
-@app.post("/amenities/", response_model=Amenity)
+@app.post("/amenities/", response_model=AmenityResponse)
 def create_amenity(amenity: AmenityCreate, db: Session = Depends(get_db)):
     db_amenity = AmenitySchema(name=amenity.name)
     db.add(db_amenity)
@@ -65,14 +71,13 @@ def create_amenity(amenity: AmenityCreate, db: Session = Depends(get_db)):
 ### POST methods
 
 # Create a new flat
-@app.post("/flats/", response_model=Flat)
+@app.post("/flats/", response_model=FlatResponse)
 def create_flat(flat: FlatCreate, db: Session = Depends(get_db)):
     db_flat = FlatSchema(
         title=flat.title,
         description=flat.description,
         address=flat.address,
-        latitude=flat.latitude,
-        longitude=flat.longitude,
+        coordinates=flat.coordinates,
         floor=flat.floor,
         rooms_number=flat.rooms_number,
         square=flat.square,

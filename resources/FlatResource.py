@@ -1,31 +1,17 @@
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 
 from geoalchemy2.shape import from_shape
-from pydantic import BaseModel, Field
+from shapely.geometry import shape
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from shapely.geometry import shape
 
+from api.schemas.FlatApiSchema import FlatCreate
 from database.schemas.FlatSchema import FlatSchema
-
-
-# Pydantic model for Flat data validation
-class FlatCreate(BaseModel):
-    title: str = Field(..., min_length=1, max_length=150)
-    description: str = Field(..., min_length=1, max_length=1000)
-    address: str = Field(..., max_length=200)
-    coordinates: Dict[str, Any] = Field(..., description="Geographic boundaries in GeoJSON format")  # GeoJSON format
-    floor: Optional[int] = Field(None, ge=0)
-    rooms_number: int = Field(..., ge=0)
-    square: float = Field(..., gt=0)
-    price: float = Field(..., ge=0)
-    currency: str = Field(default="PLN", max_length=10)
-    city_id: int = Field(..., gt=0)
-    district_id: int = Field(..., gt=0)
 
 
 def get_table_schema():
     return {column.name: column for column in FlatSchema.__table__.columns}
+
 
 def get_table_cols_with_geojson():
     cols = get_table_schema()
@@ -42,7 +28,6 @@ class FlatResource:
         """
         self.db = db
         self.schema_geojson_cols = get_table_cols_with_geojson()  # A list with SQLAlchemy column objects that store geometry data in GeoJSON format.
-
 
     def get_all_flats(self) -> List[FlatSchema]:
         """
@@ -105,7 +90,6 @@ class FlatResource:
         self.db.commit()
         self.db.refresh(flat)
         return flat
-
 
     def delete_flat(self, flat_id: int) -> bool:
         """
