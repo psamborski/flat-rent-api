@@ -1,7 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
-from database.AmenitySchema import AmenitySchema
+from database.schemas.AmenitySchema import AmenitySchema
 
 
 class AmenityResource:

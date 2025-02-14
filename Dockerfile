@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Make wait-for-it.sh executable
-RUN chmod +x ./scripts/bash/wait-for-it.sh
+RUN chmod +x ./helpers/scripts/bash/wait-for-it.sh

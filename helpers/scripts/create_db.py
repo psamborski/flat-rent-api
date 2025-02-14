@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from database.database import engine, Base
-from scripts.add_data_to_db import add_cities, add_amenities, add_flats, add_flat_amenities
+from helpers.scripts.add_data_to_db import add_cities, add_amenities, add_flats, add_flat_amenities
 
 
 # Create schema if it doesn't exist

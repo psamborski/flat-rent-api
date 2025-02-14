@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from shapely.geometry import shape
 
 
-from database.DistrictSchema import DistrictSchema
+from database.schemas.DistrictSchema import DistrictSchema
 
 
 class DistrictCreate(BaseModel):

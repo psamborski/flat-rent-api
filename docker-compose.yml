@@ -13,7 +13,7 @@ services:
 
   init-db:
     build: .
-    command: ./scripts/bash/wait-for-it.sh db:5432 -- python -m scripts.create_db
+    command: ./helpers/scripts/bash/wait-for-it.sh db:5432 -- python -m scripts.create_db
     depends_on:
       - db
 

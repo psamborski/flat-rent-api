@@ -6,7 +6,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from shapely.geometry import shape
 
-from database.FlatSchema import FlatSchema
+from database.schemas.FlatSchema import FlatSchema
 
 
 # Pydantic model for Flat data validation

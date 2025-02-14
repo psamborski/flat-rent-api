@@ -2,7 +2,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
-from database.FlatAmenitySchema import FlatAmenitySchema
+from database.schemas.FlatAmenitySchema import FlatAmenitySchema
 
 
 class FlatAmenityResource:
