@@ -15,8 +15,8 @@ class DistrictSchema(Base):
     __table_args__ = {'schema': SCHEMA}
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(200), index=True)  # District name, indexed for faster queries
-    boundaries = Column(Geometry(geometry_type='POLYGON', srid=4326))  # Geographic boundaries of the district
+    name = Column(String(200), nullable=False, index=True)  # District name, indexed for faster queries
+    boundaries = Column(Geometry(geometry_type='POLYGON', srid=4326), nullable=False)  # Geographic boundaries of the district
     city_id = Column(Integer, ForeignKey(f"{SCHEMA}.cities.id", ondelete="CASCADE"), nullable=False)
 
     # Relationships
