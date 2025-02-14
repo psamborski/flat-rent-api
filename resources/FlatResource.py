@@ -1,6 +1,10 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+
+from geoalchemy2.shape import from_shape
 from pydantic import BaseModel, Field
+from sqlalchemy import func
 from sqlalchemy.orm import Session
+from shapely.geometry import shape
 
 from database.FlatSchema import FlatSchema
 
@@ -10,7 +14,7 @@ class FlatCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=150)
     description: str = Field(..., min_length=1, max_length=1000)
     address: str = Field(..., max_length=200)
-    coordinates: str = Field(..., pattern=r"^-?\d+(\.\d+)?,-?\d+(\.\d+)?$")  # Validate coordinates format (e.g., "52.2297,21.0122")
+    coordinates: Dict[str, Any] = Field(..., description="Geographic boundaries in GeoJSON format")  # GeoJSON format
     floor: Optional[int] = Field(None, ge=0)
     rooms_number: int = Field(..., ge=0)
     square: float = Field(..., gt=0)
@@ -18,6 +22,15 @@ class FlatCreate(BaseModel):
     currency: str = Field(default="PLN", max_length=10)
     city_id: int = Field(..., gt=0)
     district_id: int = Field(..., gt=0)
+
+
+def get_table_schema():
+    return {column.name: column for column in FlatSchema.__table__.columns}
+
+def get_table_cols_with_geojson():
+    cols = get_table_schema()
+    cols["coordinates"] = func.ST_AsGeoJSON(FlatSchema.coordinates).label("coordinates")
+    return cols.values()
 
 
 class FlatResource:
@@ -28,6 +41,8 @@ class FlatResource:
         :param db: SQLAlchemy database session.
         """
         self.db = db
+        self.schema_geojson_cols = get_table_cols_with_geojson()  # A list with SQLAlchemy column objects that store geometry data in GeoJSON format.
+
 
     def get_all_flats(self) -> List[FlatSchema]:
         """
@@ -35,7 +50,7 @@ class FlatResource:
 
         :return: A list of FlatSchema instances representing all flats in the database.
         """
-        return self.db.query(FlatSchema).all()
+        return self.db.query(*self.schema_geojson_cols).all()
 
     def get_flat_by_id(self, flat_id: int) -> Optional[FlatSchema]:
         """
@@ -44,7 +59,7 @@ class FlatResource:
         :param flat_id: The ID of the flat to retrieve.
         :return: A FlatSchema instance representing the flat, or None if no flat is found.
         """
-        return self.db.query(FlatSchema).filter(FlatSchema.id == flat_id).first()
+        return self.db.query(*self.schema_geojson_cols).filter(FlatSchema.id == flat_id).first()
 
     def get_flats_by_district(self, district_id: int) -> List[FlatSchema]:
         """
@@ -53,7 +68,7 @@ class FlatResource:
         :param district_id: The ID of the district to filter flats by.
         :return: A list of FlatSchema instances representing flats in the specified district.
         """
-        return self.db.query(FlatSchema).filter(FlatSchema.district_id == district_id).all()
+        return self.db.query(*self.schema_geojson_cols).filter(FlatSchema.district_id == district_id).all()
 
     def get_flats_by_city(self, city_id: int) -> List[FlatSchema]:
         """
@@ -62,7 +77,7 @@ class FlatResource:
         :param city_id: The ID of the city to filter flats by.
         :return: A list of FlatSchema instances representing flats in the specified city.
         """
-        return self.db.query(FlatSchema).filter(FlatSchema.city_id == city_id).all()
+        return self.db.query(*self.schema_geojson_cols).filter(FlatSchema.city_id == city_id).all()
 
     def create_flat(self, flat_data: FlatCreate) -> FlatSchema:
         """
@@ -71,11 +86,13 @@ class FlatResource:
         :param flat_data: A FlatCreate instance containing the data for the new flat.
         :return: A FlatSchema instance representing the newly created flat.
         """
+        point_geometry = from_shape(shape(flat_data.coordinates), srid=4326)  # convert GeoJSON to WKT
+
         flat = FlatSchema(
             title=flat_data.title,
             description=flat_data.description,
             address=flat_data.address,
-            coordinates=f"POINT({flat_data.coordinates})",  # Convert coordinates to WKT format
+            coordinates=point_geometry,  # in WKT format
             floor=flat_data.floor,
             rooms_number=flat_data.rooms_number,
             square=flat_data.square,
@@ -88,3 +105,18 @@ class FlatResource:
         self.db.commit()
         self.db.refresh(flat)
         return flat
+
+
+    def delete_flat(self, flat_id: int) -> bool:
+        """
+        Delete a flat from the database.
+
+        :param flat_id: The ID of the flat to delete.
+        :return: True if the flat was deleted, False otherwise.
+        """
+        district = self.db.query(FlatSchema).filter(FlatSchema.id == flat_id).first()
+        if district:
+            self.db.delete(district)
+            self.db.commit()
+            return True
+        return False
