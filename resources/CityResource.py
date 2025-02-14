@@ -55,14 +55,14 @@ class CityResource:
         """
         return self.db.query(*self.schema_geojson_cols).filter(CitySchema.id == city_id).first()
 
-    def get_cities_by_city(self, city_id: int) -> List[CitySchema]:
+    def get_cities_by_country_name(self, country_name: str) -> List[CitySchema]:
         """
-        Retrieve all cities in a specific city.
+        Retrieve all cities by country name.
 
-        :param city_id: The ID of the city to filter cities by.
+        :param country_name: The name of the country to filter cities by.
         :return: A list of CitySchema instances representing cities in the specified city.
         """
-        return self.db.query(*self.schema_geojson_cols).filter(CitySchema.city_id == city_id).all()
+        return self.db.query(*self.schema_geojson_cols).filter(CitySchema.country == country_name).all()
 
     def create_city(self, city_data: CityCreate) -> CitySchema:
         """
