@@ -19,6 +19,15 @@ class DistrictCreate(BaseModel):
     city_id: int = Field(..., gt=0, description="ID of the city associated with the district")  # City ID, must be greater than 0
 
 
+def get_table_schema():
+    return {column.name: column for column in DistrictSchema.__table__.columns}
+
+def get_table_cols_with_geojson():
+    cols = get_table_schema()
+    cols["boundaries"] = func.ST_AsGeoJSON(DistrictSchema.boundaries).label("boundaries")
+    return cols.values()
+
+
 class DistrictResource:
     def __init__(self, db: Session):
         """
@@ -27,6 +36,7 @@ class DistrictResource:
         :param db: SQLAlchemy database session.
         """
         self.db = db
+        self.schema_geojson_cols = get_table_cols_with_geojson()  # A list with SQLAlchemy column objects that store geometry data in GeoJSON format.
 
     def get_all_districts(self) -> List[DistrictSchema]:
         """
@@ -34,12 +44,7 @@ class DistrictResource:
 
         :return: A list of DistrictSchema instances representing all districts.
         """
-        return self.db.query(
-            DistrictSchema.id,
-            DistrictSchema.name,
-            func.ST_AsGeoJSON(DistrictSchema.boundaries).label("boundaries"),  # convert WKT to GeoJSON
-            DistrictSchema.city_id
-        ).all()
+        return self.db.query(*self.schema_geojson_cols).all()
 
     def get_district_by_id(self, district_id: int) -> Optional[DistrictSchema]:
         """
@@ -48,21 +53,7 @@ class DistrictResource:
         :param district_id: The ID of the district to retrieve.
         :return: A DistrictSchema instance representing the district, or None if no district is found.
         """
-        district = self.db.query(
-            DistrictSchema.id,
-            DistrictSchema.name,
-            func.ST_AsGeoJSON(DistrictSchema.boundaries).label("boundaries"),  # convert WKT to GeoJSON
-            DistrictSchema.city_id
-        ).filter(DistrictSchema.id == district_id).first()
-
-        if district:
-            return {
-                "id": district.id,
-                "name": district.name,
-                "boundaries": district.boundaries,  # convert WKT to GeoJSON
-                "city_id": district.city_id
-            }
-        return None
+        return self.db.query(*self.schema_geojson_cols).filter(DistrictSchema.id == district_id).first()
 
     def get_districts_by_city(self, city_id: int) -> List[DistrictSchema]:
         """
@@ -71,12 +62,7 @@ class DistrictResource:
         :param city_id: The ID of the city to filter districts by.
         :return: A list of DistrictSchema instances representing districts in the specified city.
         """
-        return self.db.query(
-            DistrictSchema.id,
-            DistrictSchema.name,
-            func.ST_AsGeoJSON(DistrictSchema.boundaries).label("boundaries"),  # convert WKT to GeoJSON
-            DistrictSchema.city_id
-        ).filter(DistrictSchema.city_id == city_id).all()
+        return self.db.query(*self.schema_geojson_cols).filter(DistrictSchema.city_id == city_id).all()
 
     def create_district(self, district_data: DistrictCreate) -> DistrictSchema:
         """
@@ -85,11 +71,11 @@ class DistrictResource:
         :param district_data: A DistrictCreate instance containing the data for the new district.
         :return: A DistrictSchema instance representing the newly created district.
         """
-        geometry = from_shape(shape(district_data.boundaries), srid=4326)  # convert GeoJSON to WKT
+        boundaries_geometry = from_shape(shape(district_data.boundaries), srid=4326)  # convert GeoJSON to WKT
 
         district = DistrictSchema(
             name=district_data.name,
-            boundaries=geometry,
+            boundaries=boundaries_geometry,
             city_id=district_data.city_id
         )
         self.db.add(district)
