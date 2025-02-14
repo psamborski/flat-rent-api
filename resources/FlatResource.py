@@ -8,7 +8,7 @@ from database.FlatSchema import FlatSchema
 # Pydantic model for Flat data validation
 class FlatCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=150)
-    description: Optional[str] = Field(None, max_length=1000)
+    description: str = Field(..., min_length=1, max_length=1000)
     address: str = Field(..., max_length=200)
     coordinates: str = Field(..., pattern=r"^-?\d+(\.\d+)?,-?\d+(\.\d+)?$")  # Validate coordinates format (e.g., "52.2297,21.0122")
     floor: Optional[int] = Field(None, ge=0)
