@@ -1,22 +1,11 @@
 from typing import List, Optional, Dict, Any
 
 from geoalchemy2.shape import from_shape
-from pydantic import BaseModel, Field
 from shapely.geometry import shape
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from database.schemas.DistrictSchema import DistrictSchema
-
-
-class DistrictCreate(BaseModel):
-    """
-    Pydantic model for validating district creation data.
-    """
-    name: str = Field(..., min_length=1, max_length=200)  # District name, required, 1-200 characters
-    boundaries: Dict[str, Any] = Field(..., description="Geographic boundaries in GeoJSON format")  # GeoJSON format
-    city_id: int = Field(..., gt=0,
-                         description="ID of the city associated with the district")  # City ID, must be greater than 0
 
 
 def get_table_schema():
@@ -95,6 +84,7 @@ class DistrictResource:
         :return: The updated DistrictSchema instance, or None if no district is found.
         """
         district = self.get_district_by_id(district_id)
+
         if district:
             if name:
                 district.name = name
