@@ -51,6 +51,22 @@ class AmenityResource:
         self.db.commit()
         self.db.refresh(amenity)
         return amenity
+    
+    def update_amenity(self, amenity_id: int, name: Optional[str] = None) -> AmenitySchema:
+        """
+        Update an existing amenity in the database.
+        :param amenity_id: ID of the amenity to update.
+        :param name: The new name of the amenity.
+        :return: An AmenitySchema instance representing the updated amenity.
+        """
+        amenity = self.get_amenity_by_id(amenity_id)
+        if amenity:
+            if name:
+                amenity.name = name
+
+            self.db.commit()
+            self.db.refresh(amenity)
+        return amenity        
 
     def delete_amenity(self, amenity_id: int) -> bool:
         """

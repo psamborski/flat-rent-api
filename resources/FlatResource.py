@@ -5,7 +5,7 @@ from shapely.geometry import shape
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from api.schemas.FlatApiSchema import FlatCreate
+from api.schemas.FlatApiSchema import FlatCreate, FlatUpdate
 from database.schemas.FlatSchema import FlatSchema
 
 
@@ -90,6 +90,31 @@ class FlatResource:
         self.db.commit()
         self.db.refresh(flat)
         return flat
+
+    def update_flat(self, flat_data: FlatUpdate) -> FlatSchema:
+        """
+        Update an existing flat in the database.
+
+        :param flat_data: A FlatUpdate instance containing the data for the new flat.
+        :return: The updated FlatSchema instance.
+        """
+        flat = self.get_flat_by_id(flat_data.id)
+
+        if flat:
+            update_dict = flat_data.model_dump(exclude_unset=True, exclude={'id'})  # Pomija wartości None
+
+            # Convert GeoJSON to WKT if needed
+            if "coordinates" in update_dict and update_dict["coordinates"]:
+                update_dict["coordinates"] = from_shape(shape(update_dict["coordinates"]), srid=4326)
+
+            for key, value in update_dict.items():
+                setattr(flat, key, value)  # Dynamiczne przypisywanie wartości
+
+            self.db.commit()
+            self.db.refresh(flat)
+        return flat
+
+
 
     def delete_flat(self, flat_id: int) -> bool:
         """

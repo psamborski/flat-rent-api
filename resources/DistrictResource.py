@@ -94,7 +94,7 @@ class DistrictResource:
         :param boundaries: The new geographic boundaries of the district (in WKT format, optional).
         :return: The updated DistrictSchema instance, or None if no district is found.
         """
-        district = self.db.query(DistrictSchema).filter(DistrictSchema.id == district_id).first()
+        district = self.get_district_by_id(district_id)
         if district:
             if name:
                 district.name = name
